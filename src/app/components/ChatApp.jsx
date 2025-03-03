@@ -300,7 +300,7 @@ export default function ChatApp() {
               Logged in as: <strong>{currentUser.fullname}</strong>
             </span>
             <button className={styles.logoutBtn} onClick={handleLogout}>
-              Logout
+              Logouts
             </button>
           </div>
           <div id="cometchat" className={styles.cometchat}></div>
