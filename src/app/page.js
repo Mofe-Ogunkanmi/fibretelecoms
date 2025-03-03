@@ -1,4 +1,4 @@
-import styles from "./styles/style.css";
+import styles from "./styles/Home.module.css";
 import ChatApp from "./components/ChatApp";
 
 export const metadata = {
