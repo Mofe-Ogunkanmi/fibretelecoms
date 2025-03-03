@@ -95,6 +95,7 @@ export default function ChatApp() {
           width: "100%",
           defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
           defaultType: "group",
+          darkMode: true,
         });
       }
     } catch (error) {
