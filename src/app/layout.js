@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css";
+import "https://unicons.iconscout.com/release/v2.1.9/css/unicons.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

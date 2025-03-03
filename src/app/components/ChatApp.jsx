@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "../styles/Home.module.css";
 import Script from "next/script";
+import "../styles/Home.module.css";
 
 export default function ChatApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,6 +15,7 @@ export default function ChatApp() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [message, setMessage] = useState({ signup: "", login: "", type: "" });
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isSignupActive, setIsSignupActive] = useState(false);
 
   // Check if user is already logged in on component mount
   useEffect(() => {
@@ -116,6 +117,11 @@ export default function ChatApp() {
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
   };
 
+  // Toggle between login and signup
+  const toggleForm = () => {
+    setIsSignupActive(!isSignupActive);
+  };
+
   // Sign up function
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -172,6 +178,9 @@ export default function ChatApp() {
 
       // Clear form
       setSignupForm({ username: "", fullname: "", password: "" });
+
+      // Switch to login
+      setIsSignupActive(false);
     } catch (error) {
       showMessage("signup", "Failed to create user: " + error.message, "error");
     }
@@ -292,111 +301,152 @@ export default function ChatApp() {
         onLoad={handleScriptLoad}
         strategy="lazyOnload"
       />
+      <Script
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"
+        strategy="lazyOnload"
+      />
 
       {isLoggedIn && currentUser ? (
         <>
-          <div className={styles.userInfo}>
+          <div className="chat-user-info">
             <span>
               Logged in as: <strong>{currentUser.fullname}</strong>
             </span>
-            <button className={styles.logoutBtn} onClick={handleLogout}>
+            <button className="chat-logout-btn btn" onClick={handleLogout}>
               Logout
             </button>
           </div>
-          <div id="cometchat" className={styles.cometchat}></div>
+          <div id="cometchat" className="chat-cometchat"></div>
         </>
       ) : (
-        <div className={styles.authContainer}>
-          <div className={styles.authForm}>
-            <h2>Sign Up</h2>
-            <form onSubmit={handleSignup}>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-username">Username</label>
-                <input
-                  type="text"
-                  id="signup-username"
-                  name="username"
-                  placeholder="Choose a username"
-                  required
-                  value={signupForm.username}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-fullname">Full Name</label>
-                <input
-                  type="text"
-                  id="signup-fullname"
-                  name="fullname"
-                  placeholder="Your full name"
-                  required
-                  value={signupForm.fullname}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-password">Password</label>
-                <input
-                  type="password"
-                  id="signup-password"
-                  name="password"
-                  placeholder="Choose a password"
-                  required
-                  value={signupForm.password}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <button type="submit">Sign Up</button>
-              {message.signup && (
-                <div
-                  className={`${styles.message} ${
-                    message.type ? styles[message.type] : ""
-                  }`}
-                >
-                  {message.signup}
+        <div className="chat-section">
+          <div className="chat-container">
+            <div className="row full-height justify-content-center">
+              <div className="col-12 text-center align-self-center py-5">
+                <div className="chat-section pb-5 pt-5 pt-sm-2 text-center">
+                  <h6 className="mb-0 pb-3">
+                    <span>Log In </span>
+                    <span>Sign Up</span>
+                  </h6>
+                  <input
+                    className="checkbox"
+                    type="checkbox"
+                    id="reg-log"
+                    name="reg-log"
+                    checked={isSignupActive}
+                    onChange={toggleForm}
+                  />
+                  <label htmlFor="reg-log"></label>
+                  <div className="card-3d-wrap mx-auto">
+                    <div className="card-3d-wrapper">
+                      <div className="card-front">
+                        <div className="center-wrap">
+                          <div className="chat-section text-center">
+                            <h4 className="mb-4 pb-3">Log In</h4>
+                            <form onSubmit={handleLogin}>
+                              <div className="form-group">
+                                <input
+                                  type="text"
+                                  name="username"
+                                  className="form-style"
+                                  placeholder="Your Username"
+                                  id="login-username"
+                                  value={loginForm.username}
+                                  onChange={handleLoginChange}
+                                  autoComplete="off"
+                                />
+                                <i className="input-icon uil uil-at"></i>
+                              </div>
+                              <div className="form-group mt-2">
+                                <input
+                                  type="password"
+                                  name="password"
+                                  className="form-style"
+                                  placeholder="Your Password"
+                                  id="login-password"
+                                  value={loginForm.password}
+                                  onChange={handleLoginChange}
+                                  autoComplete="off"
+                                />
+                                <i className="input-icon uil uil-lock-alt"></i>
+                              </div>
+                              <button type="submit" className="btn mt-4">
+                                Submit
+                              </button>
+                              {message.login && (
+                                <div
+                                  className={`chat-message mt-3 ${message.type}`}
+                                >
+                                  {message.login}
+                                </div>
+                              )}
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="card-back">
+                        <div className="center-wrap">
+                          <div className="chat-section text-center">
+                            <h4 className="mb-4 pb-3">Sign Up</h4>
+                            <form onSubmit={handleSignup}>
+                              <div className="form-group">
+                                <input
+                                  type="text"
+                                  name="username"
+                                  className="form-style"
+                                  placeholder="Your Username"
+                                  id="signup-username"
+                                  value={signupForm.username}
+                                  onChange={handleSignupChange}
+                                  autoComplete="off"
+                                />
+                                <i className="input-icon uil uil-at"></i>
+                              </div>
+                              <div className="form-group mt-2">
+                                <input
+                                  type="text"
+                                  name="fullname"
+                                  className="form-style"
+                                  placeholder="Your Full Name"
+                                  id="signup-fullname"
+                                  value={signupForm.fullname}
+                                  onChange={handleSignupChange}
+                                  autoComplete="off"
+                                />
+                                <i className="input-icon uil uil-user"></i>
+                              </div>
+                              <div className="form-group mt-2">
+                                <input
+                                  type="password"
+                                  name="password"
+                                  className="form-style"
+                                  placeholder="Your Password"
+                                  id="signup-password"
+                                  value={signupForm.password}
+                                  onChange={handleSignupChange}
+                                  autoComplete="off"
+                                />
+                                <i className="input-icon uil uil-lock-alt"></i>
+                              </div>
+                              <button type="submit" className="btn mt-4">
+                                Submit
+                              </button>
+                              {message.signup && (
+                                <div
+                                  className={`chat-message mt-3 ${message.type}`}
+                                >
+                                  {message.signup}
+                                </div>
+                              )}
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </form>
-          </div>
-
-          <div className={styles.authForm}>
-            <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-              <div className={styles.formGroup}>
-                <label htmlFor="login-username">Username</label>
-                <input
-                  type="text"
-                  id="login-username"
-                  name="username"
-                  placeholder="Your username"
-                  required
-                  value={loginForm.username}
-                  onChange={handleLoginChange}
-                />
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="login-password">Password</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  name="password"
-                  placeholder="Your password"
-                  required
-                  value={loginForm.password}
-                  onChange={handleLoginChange}
-                />
-              </div>
-              <button type="submit">Login</button>
-              {message.login && (
-                <div
-                  className={`${styles.message} ${
-                    message.type ? styles[message.type] : ""
-                  }`}
-                >
-                  {message.login}
-                </div>
-              )}
-            </form>
+            </div>
           </div>
         </div>
       )}
