@@ -44,6 +44,12 @@ export default function ChatApp() {
   };
 
   // Initialize CometChat
+  useEffect(() => {
+    if (isScriptLoaded) {
+      initializeCometChat();
+    }
+  }, [isScriptLoaded]); // Remove `currentUser` from the dependency array
+
   const initializeCometChat = async () => {
     try {
       if (typeof window === "undefined" || !window.CometChatWidget) return;
@@ -73,8 +79,8 @@ export default function ChatApp() {
 
       console.log("CometChat initialization completed successfully");
 
-      // Log in user if one is stored
-      if (currentUser) {
+      // Log in user if one is stored and not already logged in
+      if (currentUser && !isLoggedIn) {
         loginCometChatUser(currentUser.username);
       }
     } catch (error) {
@@ -86,12 +92,6 @@ export default function ChatApp() {
       );
     }
   };
-
-  useEffect(() => {
-    if (isScriptLoaded) {
-      initializeCometChat();
-    }
-  }, [isScriptLoaded, currentUser]);
 
   // Handle form changes
   const handleSignupChange = (e) => {
