@@ -202,30 +202,9 @@ export default function ChatApp() {
       const users = JSON.parse(localStorage.getItem("cometChatUsers"));
       const userData = users[username];
 
-      // Get an auth token for this user from our secure API
-      const response = await fetch("/api/auths", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "getAuthToken",
-          uid: username,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to get auth token:", errorData);
-        throw new Error(errorData.message || "Failed to get auth token");
-      }
-
-      const authData = await response.json();
-
-      // Login with the auth token
+      // Login without an auth token
       const user = await window.CometChatWidget.login({
         uid: username,
-        authToken: authData.authToken,
       });
 
       console.log("Login successful:", user);
