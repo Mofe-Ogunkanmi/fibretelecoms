@@ -241,6 +241,7 @@ export default function ChatApp() {
         width: "100%",
         defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
         defaultType: "group",
+        darkMode: true,
       });
     } catch (error) {
       console.error("User login failed with error:", error);
@@ -300,7 +301,7 @@ export default function ChatApp() {
               Logged in as: <strong>{currentUser.fullname}</strong>
             </span>
             <button className={styles.logoutBtn} onClick={handleLogout}>
-              Logouts
+              Logout
             </button>
           </div>
           <div id="cometchat" className={styles.cometchat}></div>
