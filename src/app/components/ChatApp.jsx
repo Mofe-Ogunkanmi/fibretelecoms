@@ -216,6 +216,7 @@ export default function ChatApp() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Failed to get auth token:", errorData);
         throw new Error(errorData.message || "Failed to get auth token");
       }
 
@@ -249,7 +250,7 @@ export default function ChatApp() {
         defaultType: "group",
       });
     } catch (error) {
-      console.log("User login failed with error:", error);
+      console.error("User login failed with error:", error);
       showMessage(
         "login",
         "Failed to login to chat. Please try again.",
