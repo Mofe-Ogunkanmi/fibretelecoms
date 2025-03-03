@@ -29,6 +29,7 @@ export async function POST(request) {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error("Failed to generate auth token:", data);
         return NextResponse.json(
           { message: data.message || "Failed to generate auth token" },
           { status: response.status }
