@@ -19,14 +19,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css"
-      />
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
       </body>
