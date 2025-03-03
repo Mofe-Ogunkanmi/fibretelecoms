@@ -49,7 +49,7 @@ export default function ChatApp() {
       if (typeof window === "undefined" || !window.CometChatWidget) return;
 
       // Get the auth key from our secure API endpoint
-      const response = await fetch("/api/auth", {
+      const response = await fetch("/api/auths", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -203,7 +203,7 @@ export default function ChatApp() {
       const userData = users[username];
 
       // Get an auth token for this user from our secure API
-      const response = await fetch("/api/auth", {
+      const response = await fetch("/api/auths", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
