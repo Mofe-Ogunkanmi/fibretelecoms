@@ -16,8 +16,8 @@ export default function ChatApp() {
   const [message, setMessage] = useState({ signup: "", login: "", type: "" });
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
+  // Check if user is already logged in on component mount
   useEffect(() => {
-    // Check if user is already logged in
     const storedUser =
       typeof window !== "undefined"
         ? localStorage.getItem("currentCometChatUser")
@@ -40,16 +40,16 @@ export default function ChatApp() {
   // Handle CometChat script loading
   const handleScriptLoad = () => {
     setIsScriptLoaded(true);
-    initializeCometChat();
   };
 
-  // Initialize CometChat
+  // Initialize CometChat when the script is loaded
   useEffect(() => {
     if (isScriptLoaded) {
       initializeCometChat();
     }
-  }, [isScriptLoaded]); // Remove `currentUser` from the dependency array
+  }, [isScriptLoaded]);
 
+  // Initialize CometChat and re-launch widget for logged-in users
   const initializeCometChat = async () => {
     try {
       if (typeof window === "undefined" || !window.CometChatWidget) return;
@@ -79,9 +79,23 @@ export default function ChatApp() {
 
       console.log("CometChat initialization completed successfully");
 
-      // If there's a current user, always try to log them in and launch the widget
-      if (currentUser) {
-        await loginAndLaunchCometChat(currentUser.username);
+      // Check if a user is already logged in and re-launch the widget
+      const storedUser = localStorage.getItem("currentCometChatUser");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setCurrentUser(userData);
+        setIsLoggedIn(true);
+
+        // Re-launch the widget for the logged-in user
+        window.CometChatWidget.launch({
+          widgetID: process.env.NEXT_PUBLIC_COMETCHAT_WIDGET_ID,
+          target: "#cometchat",
+          roundedCorners: "true",
+          height: "600px",
+          width: "100%",
+          defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
+          defaultType: "group",
+        });
       }
     } catch (error) {
       console.log("CometChat initialization failed with error:", error);
@@ -90,53 +104,6 @@ export default function ChatApp() {
         "Failed to initialize chat. Please try again later.",
         "error"
       );
-    }
-  };
-
-  // Create a new helper function to handle both login and widget launch
-  const loginAndLaunchCometChat = async (username) => {
-    try {
-      if (typeof window === "undefined" || !window.CometChatWidget) {
-        throw new Error("CometChat SDK not loaded");
-      }
-
-      // Check if user is already logged in to CometChat
-      let user = await window.CometChatWidget.getLoggedinUser();
-
-      // If not logged in or logged in as a different user, log in
-      if (!user || user.uid !== username) {
-        user = await window.CometChatWidget.login({
-          uid: username,
-        });
-        console.log("Login successful:", user);
-      } else {
-        console.log("User already logged in:", user);
-      }
-
-      // Always launch the widget
-      window.CometChatWidget.launch({
-        widgetID: process.env.NEXT_PUBLIC_COMETCHAT_WIDGET_ID,
-        target: "#cometchat",
-        roundedCorners: "true",
-        height: "600px",
-        width: "100%",
-        defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
-        defaultType: "group",
-      });
-
-      // Update state
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error("User login or widget launch failed with error:", error);
-      showMessage(
-        "login",
-        "Failed to connect to chat. Please try again.",
-        "error"
-      );
-      // Reset login state on failure
-      localStorage.removeItem("currentCometChatUser");
-      setCurrentUser(null);
-      setIsLoggedIn(false);
     }
   };
 
@@ -231,18 +198,7 @@ export default function ChatApp() {
 
     // Login successful
     showMessage("login", "Logging in...", "");
-
-    // Save current user first
-    const userData = users[username];
-    localStorage.setItem("currentCometChatUser", JSON.stringify(userData));
-    setCurrentUser(userData);
-    setLoginForm({ username: "", password: "" });
-
-    // Then login to CometChat and launch widget
-    await loginAndLaunchCometChat(username);
-
-    // Clear login message on success
-    setMessage({ ...message, login: "" });
+    loginCometChatUser(username);
   };
 
   // Helper function to login a user to CometChat
