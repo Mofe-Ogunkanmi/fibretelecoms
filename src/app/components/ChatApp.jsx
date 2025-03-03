@@ -389,3 +389,105 @@ export default function ChatApp() {
     </>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "20px",
+  },
+  main: {
+    minHeight: "100vh",
+    padding: "4rem 0",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  title: {
+    marginBottom: "2rem",
+    fontSize: "1.8rem",
+    textAlign: "center",
+  },
+  authContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: "20px",
+    flexWrap: "wrap",
+    gap: "2rem",
+  },
+  authForm: {
+    flex: 1,
+    minWidth: "300px",
+    padding: "20px",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+  },
+  formGroup: {
+    marginBottom: "15px",
+  },
+  formGroupLabel: {
+    display: "block",
+    marginBottom: "5px",
+    fontWeight: "bold",
+  },
+  formGroupInput: {
+    width: "100%",
+    padding: "8px",
+    boxSizing: "border-box",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+  },
+  authFormButton: {
+    backgroundColor: "#4caf50",
+    color: "white",
+    padding: "10px 15px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  authFormButtonHover: {
+    backgroundColor: "#45a049",
+  },
+  message: {
+    marginTop: "15px",
+    padding: "10px",
+    borderRadius: "4px",
+  },
+  success: {
+    backgroundColor: "#dff0d8",
+    color: "#3c763d",
+  },
+  error: {
+    backgroundColor: "#f2dede",
+    color: "#a94442",
+  },
+  cometchat: {
+    height: "600px",
+    width: "100%",
+    marginTop: "20px",
+  },
+  userInfo: {
+    marginBottom: "20px",
+    padding: "10px",
+    backgroundColor: "#f8f9fa",
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  logoutBtn: {
+    backgroundColor: "#dc3545",
+    color: "white",
+    padding: "8px 12px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    marginLeft: "10px",
+  },
+  logoutBtnHover: {
+    backgroundColor: "#c82333",
+  },
+};
