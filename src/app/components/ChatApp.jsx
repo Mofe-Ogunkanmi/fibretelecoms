@@ -95,7 +95,6 @@ export default function ChatApp() {
           width: "100%",
           defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
           defaultType: "group",
-          theme: "dark",
         });
       }
     } catch (error) {
@@ -242,7 +241,6 @@ export default function ChatApp() {
         width: "100%",
         defaultID: "fibre-test-guid", // This can be any default group ID you've created in CometChat
         defaultType: "group",
-        theme: "dark",
       });
     } catch (error) {
       console.error("User login failed with error:", error);
