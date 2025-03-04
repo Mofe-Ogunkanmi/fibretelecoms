@@ -374,7 +374,7 @@ export default function ChatApp() {
                     id="signup-fullname"
                     name="fullname"
                     required
-                    placeholder="Your full name"
+                    placeholder="Your Full Name"
                     value={signupForm.fullname}
                     onChange={handleSignupChange}
                   />
