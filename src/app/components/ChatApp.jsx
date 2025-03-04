@@ -15,6 +15,8 @@ export default function ChatApp() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [message, setMessage] = useState({ signup: "", login: "", type: "" });
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
+  const handleTabSwitch = (tab) => setActiveTab(tab);
 
   // Check if user is already logged in on component mount
   useEffect(() => {
@@ -26,14 +28,6 @@ export default function ChatApp() {
       const userData = JSON.parse(storedUser);
       setCurrentUser(userData);
       setIsLoggedIn(true);
-    }
-
-    // Initialize localStorage for users if it doesn't exist
-    if (
-      typeof window !== "undefined" &&
-      !localStorage.getItem("cometChatUsers")
-    ) {
-      localStorage.setItem("cometChatUsers", JSON.stringify({}));
     }
   }, []);
 
@@ -126,20 +120,11 @@ export default function ChatApp() {
       return;
     }
 
-    // Get existing users
-    const users = JSON.parse(localStorage.getItem("cometChatUsers"));
-
-    // Check if username already exists
-    if (users[username]) {
-      showMessage("signup", "Username already exists", "error");
-      return;
-    }
-
     // Show loading message
     showMessage("signup", "Creating your account...", "");
 
     try {
-      // Register user in CometChat using our secure API endpoint
+      // Register user in CometChat and MongoDB using our API
       const response = await fetch("/api/create-user", {
         method: "POST",
         headers: {
@@ -148,6 +133,7 @@ export default function ChatApp() {
         body: JSON.stringify({
           uid: username,
           name: fullname,
+          password: password,
         }),
       });
 
@@ -156,14 +142,6 @@ export default function ChatApp() {
         throw new Error(errorData.message || "Failed to create user");
       }
 
-      // Save user to local storage
-      users[username] = {
-        username: username,
-        fullname: fullname,
-        password: password, // In a real app, NEVER store passwords in plain text
-      };
-
-      localStorage.setItem("cometChatUsers", JSON.stringify(users));
       showMessage(
         "signup",
         "Sign up successful! You can now login.",
@@ -187,22 +165,38 @@ export default function ChatApp() {
       return;
     }
 
-    // Get users from storage
-    const users = JSON.parse(localStorage.getItem("cometChatUsers"));
-
-    // Check if user exists and password matches
-    if (!users[username] || users[username].password !== password) {
-      showMessage("login", "Invalid username or password", "error");
-      return;
-    }
-
-    // Login successful
+    // Show loading message
     showMessage("login", "Logging in...", "");
-    loginCometChatUser(username);
+
+    try {
+      // Authenticate user via our API
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const data = await response.json();
+
+      // Login successful
+      loginCometChatUser(username, data.user);
+    } catch (error) {
+      showMessage("login", error.message || "Failed to login", "error");
+    }
   };
 
   // Helper function to login a user to CometChat
-  const loginCometChatUser = async (username) => {
+  const loginCometChatUser = async (username, userData) => {
     if (typeof window === "undefined" || !window.CometChatWidget) {
       showMessage(
         "login",
@@ -213,9 +207,6 @@ export default function ChatApp() {
     }
 
     try {
-      const users = JSON.parse(localStorage.getItem("cometChatUsers"));
-      const userData = users[username];
-
       // Login without an auth token
       const user = await window.CometChatWidget.login({
         uid: username,
@@ -297,7 +288,7 @@ export default function ChatApp() {
         <>
           <div className={styles.userInfo}>
             <span>
-              Logged in as: <strong>{currentUser.fullname}</strong>
+              Logged in as: <strong>{currentUser.username}</strong>
             </span>
             <button className={styles.logoutBtn} onClick={handleLogout}>
               Logout
@@ -307,96 +298,109 @@ export default function ChatApp() {
         </>
       ) : (
         <div className={styles.authContainer}>
-          <div className={styles.authForm}>
-            <h2>Sign Up</h2>
-            <form onSubmit={handleSignup}>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-username">Username</label>
-                <input
-                  type="text"
-                  id="signup-username"
-                  name="username"
-                  placeholder="Choose a username"
-                  required
-                  value={signupForm.username}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-fullname">Full Name</label>
-                <input
-                  type="text"
-                  id="signup-fullname"
-                  name="fullname"
-                  placeholder="Your full name"
-                  required
-                  value={signupForm.fullname}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="signup-password">Password</label>
-                <input
-                  type="password"
-                  id="signup-password"
-                  name="password"
-                  placeholder="Choose a password"
-                  required
-                  value={signupForm.password}
-                  onChange={handleSignupChange}
-                />
-              </div>
-              <button type="submit">Sign Up</button>
-              {message.signup && (
-                <div
-                  className={`${styles.message} ${
-                    message.type ? styles[message.type] : ""
-                  }`}
-                >
-                  {message.signup}
-                </div>
-              )}
-            </form>
-          </div>
+          <div className={styles.authBox}>
+            <div className={styles.tabContainer}>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === "login" ? styles.active : ""
+                }`}
+                onClick={() => handleTabSwitch("login")}
+              >
+                Login
+              </button>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === "signup" ? styles.active : ""
+                }`}
+                onClick={() => handleTabSwitch("signup")}
+              >
+                Sign Up
+              </button>
+            </div>
 
-          <div className={styles.authForm}>
-            <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-              <div className={styles.formGroup}>
-                <label htmlFor="login-username">Username</label>
-                <input
-                  type="text"
-                  id="login-username"
-                  name="username"
-                  placeholder="Your username"
-                  required
-                  value={loginForm.username}
-                  onChange={handleLoginChange}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="login-password">Password</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  name="password"
-                  placeholder="Your password"
-                  required
-                  value={loginForm.password}
-                  onChange={handleLoginChange}
-                />
-              </div>
-              <button type="submit">Login</button>
-              {message.login && (
-                <div
-                  className={`${styles.message} ${
-                    message.type ? styles[message.type] : ""
-                  }`}
-                >
-                  {message.login}
+            {activeTab === "login" ? (
+              <form onSubmit={handleLogin} className={styles.authForm}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="login-username">Username</label>
+                  <input
+                    type="text"
+                    id="login-username"
+                    name="username"
+                    required
+                    placeholder="Your username"
+                    value={loginForm.username}
+                    onChange={handleLoginChange}
+                  />
                 </div>
-              )}
-            </form>
+                <div className={styles.formGroup}>
+                  <label htmlFor="login-password">Password</label>
+                  <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    required
+                    placeholder="Your password"
+                    value={loginForm.password}
+                    onChange={handleLoginChange}
+                  />
+                </div>
+                <button type="submit" className={styles.buttonGroup}>
+                  Login
+                </button>
+                {message.login && (
+                  <div className={`${styles.message} ${styles[message.type]}`}>
+                    {message.login}
+                  </div>
+                )}
+              </form>
+            ) : (
+              <form onSubmit={handleSignup} className={styles.authForm}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="signup-username">Username</label>
+                  <input
+                    type="text"
+                    id="signup-username"
+                    name="username"
+                    required
+                    placeholder="Choose a username"
+                    value={signupForm.username}
+                    onChange={handleSignupChange}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="signup-fullname">Full Name</label>
+                  <input
+                    type="text"
+                    id="signup-fullname"
+                    name="fullname"
+                    required
+                    placeholder="Your full name"
+                    value={signupForm.fullname}
+                    onChange={handleSignupChange}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="signup-password">Password</label>
+                  <input
+                    type="password"
+                    id="signup-password"
+                    name="password"
+                    required
+                    placeholder="Choose a password"
+                    value={signupForm.password}
+                    onChange={handleSignupChange}
+                  />
+                </div>
+                <button type="submit" className={styles.buttonGroup}>
+                  Sign Up
+                </button>
+                {message.signup && (
+                  <div className={`${styles.message} ${styles[message.type]}`}>
+                    {message.signup}
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         </div>
       )}

@@ -1,13 +1,28 @@
 import { NextResponse } from "next/server";
 import fetch from "node-fetch";
+import connectToDatabase from "../../lib/mongodb";
+import User from "../../models/User";
+import bcrypt from "bcryptjs"; // For password hashing, install with: npm install bcryptjs
 
 export async function POST(request) {
   try {
-    const { uid, name } = await request.json();
+    const { uid, name, password } = await request.json();
 
-    if (!uid || !name) {
+    if (!uid || !name || !password) {
       return NextResponse.json(
         { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Connect to the database
+    await connectToDatabase();
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ username: uid });
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "Username already exists" },
         { status: 400 }
       );
     }
@@ -41,7 +56,22 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json(data);
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const newUser = new User({
+      username: uid,
+      fullname: name,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    return NextResponse.json({
+      success: true,
+      user: { username: uid, fullname: name },
+    });
   } catch (error) {
     console.error("Error creating user:", error);
     return NextResponse.json(
