@@ -31,6 +31,29 @@ export default function ChatApp() {
     }
   }, []);
 
+  // Add event listener for tab close/browser exit
+  useEffect(() => {
+    const handleTabClose = (event) => {
+      if (isLoggedIn && currentUser) {
+        // Logout user when tab is closed
+        handleLogout();
+
+        // Some browsers require returnValue to be set
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", handleTabClose);
+
+      // Clean up the event listener when component unmounts
+      return () => {
+        window.removeEventListener("beforeunload", handleTabClose);
+      };
+    }
+  }, [isLoggedIn, currentUser]);
+
   // Handle CometChat script loading
   const handleScriptLoad = () => {
     setIsScriptLoaded(true);
